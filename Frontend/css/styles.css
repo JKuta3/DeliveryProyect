@@ -1,0 +1,77 @@
+:root {
+    --bg-dark: #121212;
+    --bg-card: #1e1e1e;
+    --bg-sidebar: #181818;
+    --primary: #007acc;
+    --primary-hover: #005a9e;
+    --text: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --success: #4caf50;
+    --danger: #f44336;
+    --border: #333;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+body { background: var(--bg-dark); color: var(--text); height: 100vh; overflow: hidden; }
+.hidden { display: none !important; }
+
+/* Login */
+.login-container {
+    max-width: 400px; margin: 10vh auto; padding: 2rem;
+    background: var(--bg-card); border-radius: 8px; text-align: center;
+}
+.login-container input {
+    width: 100%; padding: 10px; margin: 10px 0;
+    background: var(--bg-dark); border: 1px solid var(--border); color: var(--text); border-radius: 4px;
+}
+.login-container button {
+    width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer;
+}
+.error-msg { color: var(--danger); margin-top: 10px; font-size: 0.9rem; }
+
+/* App Layout */
+header {
+    background: var(--bg-sidebar); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);
+}
+.main-layout { display: flex; height: calc(100vh - 60px); }
+.sidebar {
+    width: 200px; background: var(--bg-sidebar); padding: 1rem; border-right: 1px solid var(--border);
+}
+.nav-btn {
+    display: block; width: 100%; padding: 10px; margin-bottom: 5px;
+    background: none; border: none; color: var(--text-muted); text-align: left; cursor: pointer; border-radius: 4px;
+}
+.nav-btn:hover, .nav-btn.active { background: var(--primary); color: white; }
+.content { flex: 1; padding: 2rem; overflow-y: auto; }
+
+/* Cards & Grids */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+.card { background: var(--bg-card); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border); }
+.card h3 { color: var(--primary); margin-bottom: 0.5rem; }
+.product-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); }
+.badge { padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
+.badge-success { background: var(--success); color: white; }
+.badge-danger { background: var(--danger); color: white; }
+
+/* Forms */
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; margin-bottom: 5px; color: var(--text-muted); }
+.form-group input, .form-group select {
+    width: 100%; padding: 8px; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text); border-radius: 4px;
+}
+.btn { padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; }
+
+/* Mapa Despacho */
+.map-container {
+    width: 500px; height: 500px; background: #2a2a2a; position: relative; border: 1px solid var(--border); border-radius: 8px;
+}
+.map-point {
+    position: absolute; width: 12px; height: 12px; border-radius: 50%; transform: translate(-50%, -50%);
+}
+.point-libre { background: var(--success); }
+.point-ocupado { background: var(--danger); }
+.point-cliente { background: var(--primary); width: 16px; height: 16px; }
+
+/* Charts */
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+.chart-box { background: var(--bg-card); padding: 1rem; border-radius: 8px; height: 300px; }

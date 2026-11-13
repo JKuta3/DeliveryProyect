@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastMile Analytics</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div id="login-view" class="login-container">
+        <h1>🚀 FastMile Analytics</h1>
+        <form id="login-form">
+            <input type="text" id="username" placeholder="Usuario (admin / user)" required>
+            <input type="password" id="password" placeholder="Contraseña" required>
+            <button type="submit">Iniciar Sesión</button>
+            <p id="login-error" class="error-msg"></p>
+        </form>
+    </div>
+
+    <div id="app-view" class="hidden">
+        <header>
+            <h2>🚀 FastMile</h2>
+            <div class="user-info">
+                <span id="user-display"></span>
+                <button id="btn-logout">Salir</button>
+            </div>
+        </header>
+        <div class="main-layout">
+            <nav class="sidebar">
+                <button data-view="dashboard" class="nav-btn active">📊 Dashboard</button>
+                <button data-view="catalogo" class="nav-btn">🏪 Catálogo</button>
+                <button data-view="pedidos" class="nav-btn">📦 Pedidos</button>
+                <button data-view="despacho" class="nav-btn">🏍️ Despacho</button>
+                <button data-view="promociones" class="nav-btn">🏷️ Promociones</button>
+            </nav>
+            <main id="content-area" class="content"></main>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
