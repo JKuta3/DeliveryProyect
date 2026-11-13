@@ -1,9 +1,7 @@
-// Frontend/js/app.js
 const API_URL = 'http://localhost:3000/api';
 let currentUser = null;
-let charts = {}; // Para guardar instancias de Chart.js y destruirlas
+let charts = {};
 
-// --- INICIALIZACIÓN ---
 document.addEventListener('DOMContentLoaded', () => {
     const storedUser = localStorage.getItem('usuario');
     const storedRol = localStorage.getItem('rol');
@@ -13,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// --- AUTH ---
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const user = document.getElementById('username').value;
@@ -44,11 +41,10 @@ function showApp() {
     document.getElementById('app-view').classList.remove('hidden');
     document.getElementById('user-display').textContent = `👤 ${currentUser.nombre} (${currentUser.rol})`;
     
-    // Navegación
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', (e) => loadView(e.target.dataset.view));
     });
-    loadView('dashboard'); // Vista por defecto
+    loadView('dashboard');
 }
 
 async function loadView(viewName) {
@@ -57,7 +53,6 @@ async function loadView(viewName) {
     const content = document.getElementById('content-area');
     content.innerHTML = '<p>Cargando...</p>';
 
-    // Ocultar vistas admin si es user
     if (currentUser.rol === 'user' && ['dashboard', 'despacho', 'promociones'].includes(viewName)) {
         content.innerHTML = '<h2>Acceso restringido</h2>'; return;
     }
@@ -69,9 +64,6 @@ async function loadView(viewName) {
     else if (viewName === 'promociones') await renderPromociones(content);
 }
 
-// --- VISTAS ---
-
-// 1. DASHBOARD
 async function renderDashboard(container) {
     container.innerHTML = `
         <h2>📊 Dashboard Analítico</h2>
@@ -83,7 +75,6 @@ async function renderDashboard(container) {
     `;
     const data = await (await fetch(`${API_URL}/reportes/dashboard`)).json();
     
-    // Destruir charts anteriores si existen
     Object.values(charts).forEach(c => c.destroy());
 
     charts.pedidos = new Chart(document.getElementById('chartPedidos'), {
@@ -97,7 +88,6 @@ async function renderDashboard(container) {
     });
 }
 
-// 2. CATALOGO
 async function renderCatalogo(container) {
     const res = await fetch(`${API_URL}/locales?rol=${currentUser.rol}`);
     const data = await res.json();
@@ -112,7 +102,6 @@ async function renderCatalogo(container) {
     container.innerHTML = html + '</div>';
 }
 
-// 3. PEDIDOS
 async function renderPedidos(container) {
     container.innerHTML = `
         <h2>📦 Gestión de Pedidos</h2>
@@ -150,7 +139,6 @@ window.crearPedido = async () => {
     alert(data.message);
 };
 
-// 4. DESPACHO
 async function renderDespacho(container) {
     const res = await fetch(`${API_URL}/motociclistas`);
     const data = await res.json();
@@ -162,7 +150,6 @@ async function renderDespacho(container) {
     container.innerHTML = html;
 }
 
-// 5. PROMOCIONES
 async function renderPromociones(container) {
     const res = await fetch(`${API_URL}/promociones`);
     const data = await res.json();
