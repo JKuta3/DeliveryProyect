@@ -11,11 +11,12 @@ import motociclistasRoutes from './routes/motociclistasRoutes';
 import pedidosRoutes from './routes/pedidosRoutes';
 import promocionesRoutes from './routes/promocionesRoutes';
 import reportesRoutes from './routes/reportesRoutes';
+import { aplicarDescuento } from './controllers/localesController';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 // Middlewares globales
 app.use(cors());
@@ -37,6 +38,7 @@ app.use('/api/motociclistas', motociclistasRoutes);
 app.use('/api/pedidos', pedidosRoutes);
 app.use('/api/promociones', promocionesRoutes);
 app.use('/api/reportes', reportesRoutes);
+app.patch('/api/productos/:id/descuento', aplicarDescuento);
 
 // Iniciar servidor
 async function startServer() {

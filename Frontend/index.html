@@ -3,39 +3,375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FastMile Analytics</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>FastMile Analytics - Sistema de Delivery & Logística</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js para analíticas visuales -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-    <div id="login-view" class="login-container">
-        <h1>🚀 FastMile Analytics</h1>
-        <form id="login-form">
-            <input type="text" id="username" placeholder="Usuario (admin / user)" required>
-            <input type="password" id="password" placeholder="Contraseña" required>
-            <button type="submit">Iniciar Sesión</button>
-            <p id="login-error" class="error-msg"></p>
-        </form>
+    <!-- NOTIFICACIONES TOAST GLOBALES -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- PANTALLA DE AUTENTICACIÓN (LOGIN) -->
+    <div id="login-view" class="login-wrapper">
+        <div class="login-decor-circle circle-1"></div>
+        <div class="login-decor-circle circle-2"></div>
+        
+        <div class="login-card">
+            <div class="login-brand">
+                <div class="brand-icon-box">
+                    <span class="brand-emoji">🚀</span>
+                </div>
+                <h1>FastMile <span class="brand-highlight">Analytics</span></h1>
+                <p class="brand-subtitle">Plataforma Inteligente de Despacho y Logística de Delivery</p>
+            </div>
+
+            <form id="login-form" class="login-form" autocomplete="off">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="username" placeholder="admin o user" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="password" placeholder="Contraseña de acceso" required>
+                    </div>
+                </div>
+
+                <div class="quick-credentials-panel">
+                    <span class="quick-title">⚡ Acceso Rápido de Prueba:</span>
+                    <div class="quick-btn-group">
+                        <button type="button" class="btn-quick admin" onclick="setQuickLogin('admin', 'admin123')">
+                            👑 Admin (Gestión total)
+                        </button>
+                        <button type="button" class="btn-quick user" onclick="setQuickLogin('user', 'user123')">
+                            🛍️ User (Catálogo y pedidos)
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-submit-login" class="btn btn-primary btn-block btn-lg">
+                    <span>Iniciar Sesión</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+
+                <p id="login-error" class="error-msg hidden"></p>
+
+                <div class="login-footer">
+                    <button type="button" class="btn-text-config" onclick="openApiConfigModal()">
+                        ⚙️ Configurar Servidor API (IP VM)
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <div id="app-view" class="hidden">
-        <header>
-            <h2>🚀 FastMile</h2>
-            <div class="user-info">
-                <span id="user-display"></span>
-                <button id="btn-logout">Salir</button>
+    <!-- PANTALLA PRINCIPAL DE LA APLICACIÓN (DASHBOARD & MÓDULOS) -->
+    <div id="app-view" class="app-layout hidden">
+        
+        <!-- BARRA SUPERIOR (HEADER) -->
+        <header class="app-header">
+            <div class="header-left">
+                <button id="btn-sidebar-toggle" class="btn-icon-toggle" aria-label="Abrir menú">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="header-logo">
+                    <div class="logo-badge">🚀</div>
+                    <div class="logo-text">
+                        <span class="logo-title">FastMile</span>
+                        <span class="logo-tag">ANALYTICS</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-center">
+                <div class="api-status-pill" id="api-status-indicator" onclick="openApiConfigModal()" title="Clic para configurar IP del Backend">
+                    <span class="status-dot online"></span>
+                    <span class="status-text" id="api-endpoint-label">API: localhost:3000</span>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="user-profile-badge">
+                    <div class="user-avatar" id="user-avatar-initials">AD</div>
+                    <div class="user-details">
+                        <span id="user-display" class="user-name">Usuario</span>
+                        <span id="user-role-badge" class="role-pill role-admin">ADMIN</span>
+                    </div>
+                </div>
+                <button id="btn-logout" class="btn btn-outline-danger btn-sm" title="Cerrar sesión">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                    <span class="logout-text">Salir</span>
+                </button>
             </div>
         </header>
-        <div class="main-layout">
-            <nav class="sidebar">
-                <button data-view="dashboard" class="nav-btn active">📊 Dashboard</button>
-                <button data-view="catalogo" class="nav-btn">🏪 Catálogo</button>
-                <button data-view="pedidos" class="nav-btn">📦 Pedidos</button>
-                <button data-view="despacho" class="nav-btn">🏍️ Despacho</button>
-                <button data-view="promociones" class="nav-btn">🏷️ Promociones</button>
-            </nav>
-            <main id="content-area" class="content"></main>
+
+        <!-- LAYOUT CENTRAL: SIDEBAR + ÁREA DE CONTENIDO -->
+        <div class="layout-body">
+            
+            <!-- OVERLAY PARA MÓVILES -->
+            <div id="sidebar-overlay" class="sidebar-backdrop"></div>
+
+            <!-- BARRA LATERAL (SIDEBAR) -->
+            <aside id="app-sidebar" class="app-sidebar">
+                <div class="sidebar-section-title">MENÚ PRINCIPAL</div>
+                <nav class="sidebar-nav">
+                    <button data-view="dashboard" class="nav-item active" id="nav-btn-dashboard">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-label">Dashboard</span>
+                        <span class="nav-badge admin-only">Admin</span>
+                    </button>
+                    <button data-view="catalogo" class="nav-item" id="nav-btn-catalogo">
+                        <span class="nav-icon">🏪</span>
+                        <span class="nav-label">Catálogo & Locales</span>
+                    </button>
+                    <button data-view="pedidos" class="nav-item" id="nav-btn-pedidos">
+                        <span class="nav-icon">📦</span>
+                        <span class="nav-label">Pedidos & Cotizador</span>
+                    </button>
+                    <button data-view="despacho" class="nav-item" id="nav-btn-despacho">
+                        <span class="nav-icon">🏍️</span>
+                        <span class="nav-label">Despacho & Flota</span>
+                        <span class="nav-badge admin-only">Admin</span>
+                    </button>
+                    <button data-view="promociones" class="nav-item" id="nav-btn-promociones">
+                        <span class="nav-icon">🏷️</span>
+                        <span class="nav-label">Promociones</span>
+                    </button>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="system-summary-card">
+                        <div class="summary-item">
+                            <span class="summary-label">Entorno</span>
+                            <span class="summary-val">Multi-VM Node/MySQL</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Algoritmo</span>
+                            <span class="summary-val highlight">Euclidiano 2D</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- ÁREA PRINCIPAL DINÁMICA -->
+            <main id="content-area" class="main-content-view">
+                <!-- Se inyecta dinámicamente mediante app.js -->
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIGURACIÓN DE URL API (Para entorno multi-VM) -->
+    <div id="modal-api-config" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>⚙️ Configuración del Servidor API</h3>
+                <button class="btn-close-modal" onclick="closeModal('modal-api-config')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc">
+                    Configura la IP y puerto de la máquina virtual donde corre el Backend de FastMile:
+                </p>
+                <div class="form-group">
+                    <label for="cfg-api-url">URL Base de la API:</label>
+                    <input type="text" id="cfg-api-url" class="form-input" placeholder="http://localhost:3000/api">
+                </div>
+                <div class="preset-ips">
+                    <span class="preset-label">Presets rápidos:</span>
+                    <button type="button" class="btn-tag" onclick="document.getElementById('cfg-api-url').value='http://localhost:3000/api'">Localhost (3000)</button>
+                    <button type="button" class="btn-tag" onclick="document.getElementById('cfg-api-url').value='http://127.0.0.1:3000/api'">127.0.0.1</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-api-config')">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveApiUrlConfig()">Guardar y Reconectar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: REGISTRAR LOCAL (Admin) -->
+    <div id="modal-nuevo-local" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>🏪 Registrar Nuevo Local</h3>
+                <button class="btn-close-modal" onclick="closeModal('modal-nuevo-local')">✕</button>
+            </div>
+            <form id="form-nuevo-local" onsubmit="handleCrearLocal(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Nombre del Local *</label>
+                        <input type="text" id="modal-local-nombre" required class="form-input" placeholder="Ej: Pizzería Roma">
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección *</label>
+                        <input type="text" id="modal-local-direccion" required class="form-input" placeholder="Ej: Av. 6 de Agosto #1020">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-half">
+                            <label>Coordenada X (0-100) *</label>
+                            <input type="number" id="modal-local-x" min="0" max="100" step="0.1" required class="form-input" placeholder="50">
+                        </div>
+                        <div class="form-group col-half">
+                            <label>Coordenada Y (0-100) *</label>
+                            <input type="number" id="modal-local-y" min="0" max="100" step="0.1" required class="form-input" placeholder="50">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-nuevo-local')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar Local</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: AGREGAR PRODUCTO (Admin) -->
+    <div id="modal-nuevo-producto" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>🍔 Agregar Producto al Catálogo</h3>
+                <button class="btn-close-modal" onclick="closeModal('modal-nuevo-producto')">✕</button>
+            </div>
+            <form id="form-nuevo-producto" onsubmit="handleAgregarProducto(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Seleccionar Local *</label>
+                        <select id="modal-prod-local-id" required class="form-input"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre del Producto *</label>
+                        <input type="text" id="modal-prod-nombre" required class="form-input" placeholder="Ej: Hamburguesa Doble Queso">
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <input type="text" id="modal-prod-desc" class="form-input" placeholder="Ej: Con papas fritas y salsa tártara">
+                    </div>
+                    <div class="form-group">
+                        <label>Precio Original ($) *</label>
+                        <input type="number" id="modal-prod-precio" min="0.1" step="0.01" required class="form-input" placeholder="8.50">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-nuevo-producto')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Producto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: APLICAR DESCUENTO (Admin) -->
+    <div id="modal-descuento" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>🏷️ Aplicar Descuento a Producto</h3>
+                <button class="btn-close-modal" onclick="closeModal('modal-descuento')">✕</button>
+            </div>
+            <form id="form-aplicar-descuento" onsubmit="handleAplicarDescuento(event)">
+                <input type="hidden" id="modal-desc-prod-id">
+                <div class="modal-body">
+                    <p id="modal-desc-prod-name" class="highlight-info"></p>
+                    <div class="form-group">
+                        <label>Porcentaje de Descuento (1% a 99%) *</label>
+                        <input type="number" id="modal-desc-porcentaje" min="1" max="99" required class="form-input" placeholder="Ej: 15" oninput="previewDescuento()">
+                    </div>
+                    <div class="discount-calc-preview" id="discount-calc-preview">
+                        Precio con descuento: <span id="preview-precio-val" class="text-success">$0.00</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-descuento')">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Aplicar Descuento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: REGISTRAR MOTOCICLISTA (Admin) -->
+    <div id="modal-nuevo-moto" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>🏍️ Registrar Nuevo Repartidor</h3>
+                <button class="btn-close-modal" onclick="closeModal('modal-nuevo-moto')">✕</button>
+            </div>
+            <form id="form-nuevo-moto" onsubmit="handleCrearMotociclista(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Nombre Completo *</label>
+                        <input type="text" id="modal-moto-nombre" required class="form-input" placeholder="Ej: Carlos Méndez">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Vehículo *</label>
+                        <select id="modal-moto-tipo" required class="form-input">
+                            <option value="Moto">🏍️ Moto</option>
+                            <option value="Bici">🚲 Bicicleta</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Placa o Identificador *</label>
+                        <input type="text" id="modal-moto-placa" required class="form-input" placeholder="Ej: MOT-552">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-half">
+                            <label>Ubicación Inicial X (0-100) *</label>
+                            <input type="number" id="modal-moto-x" min="0" max="100" step="0.1" required class="form-input" placeholder="20">
+                        </div>
+                        <div class="form-group col-half">
+                            <label>Ubicación Inicial Y (0-100) *</label>
+                            <input type="number" id="modal-moto-y" min="0" max="100" step="0.1" required class="form-input" placeholder="30">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-nuevo-moto')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar en Flota</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CREAR PROMOCIÓN (Admin) -->
+    <div id="modal-nueva-promo" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>⚡ Lanzar Promoción Temporal</h3>
+                <button class="btn-close-modal" onclick="closeModal('modal-nueva-promo')">✕</button>
+            </div>
+            <form id="form-nueva-promo" onsubmit="handleCrearPromocion(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Local *</label>
+                        <select id="modal-promo-local-id" required class="form-input" onchange="actualizarProductosPromo()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Producto *</label>
+                        <select id="modal-promo-prod-id" required class="form-input"></select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-half">
+                            <label>Descuento (%) *</label>
+                            <input type="number" id="modal-promo-porcentaje" min="1" max="100" required class="form-input" placeholder="20">
+                        </div>
+                        <div class="form-group col-half">
+                            <label>Duración (minutos) *</label>
+                            <input type="number" id="modal-promo-duracion" min="5" max="1440" required class="form-input" placeholder="60">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-nueva-promo')">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Activar Promoción</button>
+                </div>
+            </form>
         </div>
     </div>
 

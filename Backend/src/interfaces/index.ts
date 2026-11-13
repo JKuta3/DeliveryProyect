@@ -1,55 +1,86 @@
-// Backend/src/index.ts
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import pool, { testConnection } from './config/db';
+// Backend/src/interfaces/index.ts
 
-// Importar rutas
-import authRoutes from './routes/authRoutes';
-import localesRoutes from './routes/localesRoutes';
+export type UserRole = 'admin' | 'user';
+export type VehiculoTipo = 'Moto' | 'Bici';
+export type MotociclistaEstado = 'Libre' | 'Ocupado';
+export type PedidoEstado = 'Pendiente' | 'En camino' | 'Completado' | 'Cancelado';
 
-dotenv.config();
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Middlewares globales
-app.use(cors());
-app.use(express.json());
-
-// Rutas base
-app.get('/', (req: Request, res: Response) => {
-    res.json({ status: 'ok', message: 'Bienvenido a FastMile Analytics API', version: '1.0.0' });
-});
-
-app.get('/health', (req: Request, res: Response) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString(), uptime: process.uptime() });
-});
-
-// Rutas de módulos API
-app.use('/api/auth', authRoutes);
-app.use('/api/locales', localesRoutes);
-
-// Ruta de prueba BD (puedes eliminarla después)
-app.get('/api/db-test', async (req: Request, res: Response) => {
-    try {
-        const [rows] = await pool.query('SELECT 1 + 1 AS result');
-        res.json({ status: 'ok', message: 'MySQL OK', data: rows });
-    } catch (error) {
-        res.status(500).json({ status: 'error', message: 'Error BD', error: (error as Error).message });
-    }
-});
-
-// Iniciar servidor
-async function startServer() {
-    await testConnection();
-    app.listen(PORT, '0.0.0.0', () => {
-        console.log(`\n🚀 [Server] FastMile Analytics corriendo en:`);
-        console.log(`   🌐 Local:   http://localhost:${PORT}`);
-        console.log(`   🌍 Red:     http://0.0.0.0:${PORT}\n`);
-    });
+export interface Usuario {
+    id: number;
+    nombre_usuario: string;
+    password_hash: string;
+    rol: UserRole;
+    fecha_creacion?: Date;
 }
 
-startServer();
+export interface Local {
+    id?: number;
+    nombre: string;
+    direccion: string;
+    coord_x: number;
+    coord_y: number;
+    fecha_creacion?: Date;
+    productos?: Producto[];
+}
 
-export default app;
+export interface Producto {
+    id?: number;
+    local_id: number;
+    nombre: string;
+    descripcion?: string;
+    precio: number;
+    nuevo_precio: number;
+    descuento_porcentaje?: number;
+    fecha_creacion?: Date;
+}
+
+export interface Motociclista {
+    id: number;
+    nombre: string;
+    tipo_vehiculo: VehiculoTipo;
+    placa_o_id: string;
+    estado: MotociclistaEstado;
+    coord_x: number;
+    coord_y: number;
+    fecha_registro?: Date;
+}
+
+export interface Pedido {
+    id?: number;
+    local_id: number;
+    producto_id: number;
+    motociclista_id?: number | null;
+    cliente_x: number;
+    cliente_y: number;
+    distancia_km?: number;
+    total_envio?: number;
+    estado: PedidoEstado;
+    fecha_creacion?: Date;
+    fecha_actualizacion?: Date;
+}
+
+export interface Promocion {
+    id?: number;
+    local_id: number;
+    producto_id: number;
+    porcentaje_descuento: number;
+    duracion_minutos: number;
+    fecha_inicio?: Date;
+    fecha_expiracion: string | Date;
+    activa?: boolean;
+    local_nombre?: string;
+    producto_nombre?: string;
+}
+
+export interface ApiResponse<T = any> {
+    status: 'ok' | 'error';
+    message?: string;
+    data?: T;
+    error?: string;
+}
+
+export interface DashboardReportes {
+    pedidos: Array<{ estado: PedidoEstado; total: number }>;
+    motociclistas: Array<{ estado: MotociclistaEstado; total: number }>;
+    tendencia_horaria: Array<{ bloque_horario: string; total: number }>;
+}
