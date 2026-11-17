@@ -11,7 +11,7 @@ import motociclistasRoutes from './routes/motociclistasRoutes';
 import pedidosRoutes from './routes/pedidosRoutes';
 import promocionesRoutes from './routes/promocionesRoutes';
 import reportesRoutes from './routes/reportesRoutes';
-import { aplicarDescuento } from './controllers/localesController';
+import { aplicarDescuento, actualizarProducto, eliminarProducto } from './controllers/localesController';
 
 dotenv.config();
 
@@ -38,6 +38,8 @@ app.use('/api/motociclistas', motociclistasRoutes);
 app.use('/api/pedidos', pedidosRoutes);
 app.use('/api/promociones', promocionesRoutes);
 app.use('/api/reportes', reportesRoutes);
+app.put('/api/productos/:id', actualizarProducto);
+app.delete('/api/productos/:id', eliminarProducto);
 app.patch('/api/productos/:id/descuento', aplicarDescuento);
 
 // Iniciar servidor

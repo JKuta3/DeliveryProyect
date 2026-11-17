@@ -17,11 +17,17 @@
     <!-- NOTIFICACIONES TOAST GLOBALES -->
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- PANTALLA DE AUTENTICACIÓN (LOGIN) -->
+    <!-- PANTALLA DE AUTENTICACIÓN (LOGIN & REGISTRO) -->
     <div id="login-view" class="login-wrapper">
         <div class="login-decor-circle circle-1"></div>
         <div class="login-decor-circle circle-2"></div>
         
+        <!-- Botón discreto en la esquina superior derecha para configurar IP si es necesario -->
+        <button type="button" class="btn-corner-settings" onclick="openApiConfigModal()" title="Configuración de Servidor">
+            <span class="status-dot online" id="login-status-dot"></span>
+            <span>⚙️</span>
+        </button>
+
         <div class="login-card">
             <div class="login-brand">
                 <div class="brand-icon-box">
@@ -31,12 +37,23 @@
                 <p class="brand-subtitle">Plataforma Inteligente de Despacho y Logística de Delivery</p>
             </div>
 
-            <form id="login-form" class="login-form" autocomplete="off">
+            <!-- TABS PARA ALTERNAR ENTRE INICIAR SESIÓN Y REGISTRARSE -->
+            <div class="auth-tabs">
+                <button type="button" id="tab-login" class="auth-tab-btn active" onclick="switchAuthTab('login')">
+                    Iniciar Sesión
+                </button>
+                <button type="button" id="tab-register" class="auth-tab-btn" onclick="switchAuthTab('register')">
+                    Crear Cuenta
+                </button>
+            </div>
+
+            <!-- FORMULARIO 1: INICIAR SESIÓN -->
+            <form id="login-form" class="auth-form" autocomplete="off">
                 <div class="form-group">
                     <label for="username">Usuario</label>
                     <div class="input-with-icon">
                         <span class="input-icon">👤</span>
-                        <input type="text" id="username" placeholder="admin o user" required>
+                        <input type="text" id="username" placeholder="Tu nombre de usuario" required>
                     </div>
                 </div>
 
@@ -45,6 +62,9 @@
                     <div class="input-with-icon">
                         <span class="input-icon">🔒</span>
                         <input type="password" id="password" placeholder="Contraseña de acceso" required>
+                        <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('password', this)" title="Ver / Ocultar contraseña">
+                            <span class="eye-icon">👁️</span>
+                        </button>
                     </div>
                 </div>
 
@@ -52,10 +72,10 @@
                     <span class="quick-title">⚡ Acceso Rápido de Prueba:</span>
                     <div class="quick-btn-group">
                         <button type="button" class="btn-quick admin" onclick="setQuickLogin('admin', 'admin123')">
-                            👑 Admin (Gestión total)
+                            👑 Admin Demo
                         </button>
                         <button type="button" class="btn-quick user" onclick="setQuickLogin('user', 'user123')">
-                            🛍️ User (Catálogo y pedidos)
+                            🛍️ User Demo
                         </button>
                     </div>
                 </div>
@@ -66,17 +86,50 @@
                 </button>
 
                 <p id="login-error" class="error-msg hidden"></p>
+            </form>
 
-                <div class="login-footer">
-                    <button type="button" class="btn-text-config" onclick="openApiConfigModal()">
-                        ⚙️ Configurar Servidor API (IP VM)
-                    </button>
+            <!-- FORMULARIO 2: REGISTRO DE USUARIO NUEVO (Cuenta de Cliente) -->
+            <form id="register-form" class="auth-form hidden" autocomplete="off" onsubmit="handleRegisterUser(event)">
+                <div class="form-group">
+                    <label for="reg-username">Nombre de Usuario *</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="reg-username" placeholder="Mínimo 3 caracteres" minlength="3" required>
+                    </div>
                 </div>
+
+                <div class="form-group">
+                    <label for="reg-password">Contraseña *</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="reg-password" placeholder="Mínimo 4 caracteres" minlength="4" required>
+                        <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('reg-password', this)" title="Ver / Ocultar contraseña">
+                            <span class="eye-icon">👁️</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-password-confirm">Confirmar Contraseña *</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">🔑</span>
+                        <input type="password" id="reg-password-confirm" placeholder="Repite la contraseña" minlength="4" required>
+                        <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('reg-password-confirm', this)" title="Ver / Ocultar contraseña">
+                            <span class="eye-icon">👁️</span>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-submit-register" class="btn btn-warning btn-block btn-lg" style="margin-top: 10px;">
+                    <span>✨ Crear Cuenta e Ingresar</span>
+                </button>
+
+                <p id="register-error" class="error-msg hidden"></p>
             </form>
         </div>
     </div>
 
-    <!-- PANTALLA PRINCIPAL DE LA APLICACIÓN (DASHBOARD & MÓDULOS) -->
+    <!-- PANTALLA PRINCIPAL DE LA APLICACIÓN -->
     <div id="app-view" class="app-layout hidden">
         
         <!-- BARRA SUPERIOR (HEADER) -->
@@ -94,14 +147,17 @@
                 </div>
             </div>
 
-            <div class="header-center">
-                <div class="api-status-pill" id="api-status-indicator" onclick="openApiConfigModal()" title="Clic para configurar IP del Backend">
-                    <span class="status-dot online"></span>
-                    <span class="status-text" id="api-endpoint-label">API: localhost:3000</span>
-                </div>
-            </div>
+            <!-- Centro limpio sin textos molestos -->
+            <div class="header-center-clean"></div>
 
+            <!-- Esquina derecha con perfil, botón de conexión discreto y salir -->
             <div class="header-right">
+                <!-- Botón discreto en la esquina sin textos de IP -->
+                <button type="button" class="btn-corner-icon" onclick="openApiConfigModal()" title="Configuración de Conexión">
+                    <span class="status-dot online" id="header-status-dot"></span>
+                    <span style="font-size: 1.1rem;">⚙️</span>
+                </button>
+
                 <div class="user-profile-badge">
                     <div class="user-avatar" id="user-avatar-initials">AD</div>
                     <div class="user-details">
@@ -126,35 +182,65 @@
             <aside id="app-sidebar" class="app-sidebar">
                 <div class="sidebar-section-title">MENÚ PRINCIPAL</div>
                 <nav class="sidebar-nav">
+                    <!-- Vista Dashboard (Solo Admin) -->
                     <button data-view="dashboard" class="nav-item active" id="nav-btn-dashboard">
                         <span class="nav-icon">📊</span>
                         <span class="nav-label">Dashboard</span>
                         <span class="nav-badge admin-only">Admin</span>
                     </button>
+
+                    <!-- Vista Catálogo (Admin y User) -->
                     <button data-view="catalogo" class="nav-item" id="nav-btn-catalogo">
                         <span class="nav-icon">🏪</span>
                         <span class="nav-label">Catálogo & Locales</span>
                     </button>
+
+                    <!-- Vista Editor de Catálogos (Solo Admin) -->
+                    <button data-view="editor-catalogo" class="nav-item admin-only" id="nav-btn-editor-catalogo">
+                        <span class="nav-icon">✏️</span>
+                        <span class="nav-label">Editar Catálogo</span>
+                        <span class="nav-badge admin-only">Admin</span>
+                    </button>
+
+                    <!-- Vista Pedidos y Cotizador (Admin y User) -->
                     <button data-view="pedidos" class="nav-item" id="nav-btn-pedidos">
                         <span class="nav-icon">📦</span>
                         <span class="nav-label">Pedidos & Cotizador</span>
                     </button>
+
+                    <!-- Vista Despacho Cartesiano (Solo Admin) -->
                     <button data-view="despacho" class="nav-item" id="nav-btn-despacho">
                         <span class="nav-icon">🏍️</span>
                         <span class="nav-label">Despacho & Flota</span>
                         <span class="nav-badge admin-only">Admin</span>
                     </button>
+
+                    <!-- Vista Promociones (Admin y User) -->
                     <button data-view="promociones" class="nav-item" id="nav-btn-promociones">
                         <span class="nav-icon">🏷️</span>
-                        <span class="nav-label">Promociones</span>
+                        <span class="nav-label">Promociones Flash</span>
+                    </button>
+
+                    <!-- Vista Gestión de Usuarios (Solo Admin) -->
+                    <button data-view="usuarios" class="nav-item" id="nav-btn-usuarios">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-label">Gestión Usuarios</span>
+                        <span class="nav-badge admin-only">Admin</span>
+                    </button>
+
+                    <!-- Vista Registro e Impresión de Actividades (Solo Admin) -->
+                    <button data-view="actividades" class="nav-item" id="nav-btn-actividades">
+                        <span class="nav-icon">📜</span>
+                        <span class="nav-label">Registro & Auditoría</span>
+                        <span class="nav-badge admin-only">Admin</span>
                     </button>
                 </nav>
 
                 <div class="sidebar-footer">
                     <div class="system-summary-card">
                         <div class="summary-item">
-                            <span class="summary-label">Entorno</span>
-                            <span class="summary-val">Multi-VM Node/MySQL</span>
+                            <span class="summary-label">Plataforma</span>
+                            <span class="summary-val">FastMile Analytics</span>
                         </div>
                         <div class="summary-item">
                             <span class="summary-label">Algoritmo</span>
@@ -171,30 +257,30 @@
         </div>
     </div>
 
-    <!-- MODAL: CONFIGURACIÓN DE URL API (Para entorno multi-VM) -->
+    <!-- MODAL: CONFIGURACIÓN DE CONEXIÓN (Discreto en esquina) -->
     <div id="modal-api-config" class="modal-backdrop hidden">
         <div class="modal-card">
             <div class="modal-header">
-                <h3>⚙️ Configuración del Servidor API</h3>
+                <h3>⚙️ Configuración del Servidor</h3>
                 <button class="btn-close-modal" onclick="closeModal('modal-api-config')">✕</button>
             </div>
             <div class="modal-body">
                 <p class="modal-desc">
-                    Configura la IP y puerto de la máquina virtual donde corre el Backend de FastMile:
+                    Configura la IP y puerto del servidor backend en caso de conexión entre máquinas virtuales o red local:
                 </p>
                 <div class="form-group">
-                    <label for="cfg-api-url">URL Base de la API:</label>
+                    <label for="cfg-api-url">Dirección del Servidor:</label>
                     <input type="text" id="cfg-api-url" class="form-input" placeholder="http://localhost:3000/api">
                 </div>
                 <div class="preset-ips">
-                    <span class="preset-label">Presets rápidos:</span>
+                    <span class="preset-label">Atajos:</span>
                     <button type="button" class="btn-tag" onclick="document.getElementById('cfg-api-url').value='http://localhost:3000/api'">Localhost (3000)</button>
                     <button type="button" class="btn-tag" onclick="document.getElementById('cfg-api-url').value='http://127.0.0.1:3000/api'">127.0.0.1</button>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('modal-api-config')">Cancelar</button>
-                <button class="btn btn-primary" onclick="saveApiUrlConfig()">Guardar y Reconectar</button>
+                <button class="btn btn-secondary" onclick="closeModal('modal-api-config')">Cerrar</button>
+                <button class="btn btn-primary" onclick="saveApiUrlConfig()">Guardar y Conectar</button>
             </div>
         </div>
     </div>
@@ -257,7 +343,7 @@
                         <input type="text" id="modal-prod-desc" class="form-input" placeholder="Ej: Con papas fritas y salsa tártara">
                     </div>
                     <div class="form-group">
-                        <label>Precio Original ($) *</label>
+                        <label>Precio Original (Bs.) *</label>
                         <input type="number" id="modal-prod-precio" min="0.1" step="0.01" required class="form-input" placeholder="8.50">
                     </div>
                 </div>
@@ -285,12 +371,93 @@
                         <input type="number" id="modal-desc-porcentaje" min="1" max="99" required class="form-input" placeholder="Ej: 15" oninput="previewDescuento()">
                     </div>
                     <div class="discount-calc-preview" id="discount-calc-preview">
-                        Precio con descuento: <span id="preview-precio-val" class="text-success">$0.00</span>
+                        Precio con descuento: <span id="preview-precio-val" class="text-success">Bs. 0.00</span>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('modal-descuento')">Cancelar</button>
                     <button type="submit" class="btn btn-warning">Aplicar Descuento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR LOCAL COMERCIAL (Admin) -->
+    <div id="modal-editar-local" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>✏️ Modificar Local Comercial</h3>
+                <button class="btn-close-modal" onclick="closeModal('modal-editar-local')">✕</button>
+            </div>
+            <form id="form-editar-local" onsubmit="handleGuardarEditarLocal(event)">
+                <input type="hidden" id="edit-local-id">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Nombre del Local *</label>
+                        <input type="text" id="edit-local-nombre" required class="form-input" placeholder="Ej: Hamburguesas La Paz">
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección Física *</label>
+                        <input type="text" id="edit-local-direccion" required class="form-input" placeholder="Ej: Calle Comercio 789">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-half">
+                            <label>Coordenada X (0-100) *</label>
+                            <input type="number" id="edit-local-x" min="0" max="100" step="0.1" required class="form-input" placeholder="25.0">
+                        </div>
+                        <div class="form-group col-half">
+                            <label>Coordenada Y (0-100) *</label>
+                            <input type="number" id="edit-local-y" min="0" max="100" step="0.1" required class="form-input" placeholder="30.0">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-editar-local')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR PRODUCTO (Admin) -->
+    <div id="modal-editar-producto" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>✏️ Modificar Producto del Catálogo</h3>
+                <button class="btn-close-modal" onclick="closeModal('modal-editar-producto')">✕</button>
+            </div>
+            <form id="form-editar-producto" onsubmit="handleGuardarEditarProducto(event)">
+                <input type="hidden" id="edit-prod-id">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Local Asociado *</label>
+                        <select id="edit-prod-local-id" required class="form-input"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre del Producto *</label>
+                        <input type="text" id="edit-prod-nombre" required class="form-input" placeholder="Ej: Pizza Mediana">
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <input type="text" id="edit-prod-desc" class="form-input" placeholder="Ej: Salsa de tomate, mozzarella y orégano">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-half">
+                            <label>Precio Original (Bs.) *</label>
+                            <input type="number" id="edit-prod-precio" min="0.1" step="0.01" required class="form-input" placeholder="10.00" oninput="previewEditProdPrecio()">
+                        </div>
+                        <div class="form-group col-half">
+                            <label>Descuento (0 a 99%)</label>
+                            <input type="number" id="edit-prod-descuento" min="0" max="99" value="0" class="form-input" placeholder="0" oninput="previewEditProdPrecio()">
+                        </div>
+                    </div>
+                    <div class="discount-calc-preview" id="edit-prod-calc-preview">
+                        Precio Final al Cliente: <span id="edit-prod-preview-val" class="text-success" style="font-weight:800; font-size:1.1rem;">Bs. 0.00</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-editar-producto')">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Actualizar Producto</button>
                 </div>
             </form>
         </div>
@@ -343,7 +510,7 @@
     <div id="modal-nueva-promo" class="modal-backdrop hidden">
         <div class="modal-card">
             <div class="modal-header">
-                <h3>⚡ Lanzar Promoción Temporal</h3>
+                <h3>⚡ Lanzar Promoción Flash</h3>
                 <button class="btn-close-modal" onclick="closeModal('modal-nueva-promo')">✕</button>
             </div>
             <form id="form-nueva-promo" onsubmit="handleCrearPromocion(event)">
@@ -370,6 +537,45 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('modal-nueva-promo')">Cancelar</button>
                     <button type="submit" class="btn btn-warning">Activar Promoción</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: REGISTRAR USUARIO DESDE PANEL ADMIN -->
+    <div id="modal-admin-nuevo-usuario" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>👥 Registrar Nuevo Usuario</h3>
+                <button class="btn-close-modal" onclick="closeModal('modal-admin-nuevo-usuario')">✕</button>
+            </div>
+            <form id="form-admin-nuevo-usuario" onsubmit="handleAdminCrearUsuario(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Nombre de Usuario *</label>
+                        <input type="text" id="admin-user-nombre" minlength="3" required class="form-input" placeholder="Ej: ricardo_dev">
+                    </div>
+                    <div class="form-group">
+                        <label>Rol en el Sistema *</label>
+                        <select id="admin-user-rol" class="form-input" required>
+                            <option value="user" selected>🛍️ Usuario Normal / Cliente</option>
+                            <option value="admin">👑 Administrador</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña *</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">🔒</span>
+                            <input type="password" id="admin-user-pass" minlength="4" required class="form-input" placeholder="Mínimo 4 caracteres">
+                            <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('admin-user-pass', this)">
+                                <span class="eye-icon">👁️</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modal-admin-nuevo-usuario')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Crear Usuario</button>
                 </div>
             </form>
         </div>

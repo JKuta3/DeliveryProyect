@@ -77,7 +77,7 @@ Actúa como un Arquitecto de Software Full-Stack Senior. Tu objetivo es ayudarme
   * `POST /api/pedidos/calcular-tarifa`: Calcula `total_envio = 2.50 + (distancia_km * 1.25)` y devuelve el desglose[cite: 15].
   * `POST /api/pedidos` y `GET /api/pedidos`: Crea pedidos con estado inicial `'Pendiente'` y permite listar órdenes[cite: 15].
 * **Frontend:**
-  * Cotizador interactivo de tarifas de envío en tiempo real (tarifa base `$2.50` + `$1.25/km`)[cite: 15].
+  * Cotizador interactivo de tarifas de envío en tiempo real (tarifa base `Bs. 2.50` + `Bs. 1.25/km`).
   * Formulario de creación de pedido seleccionando local, producto y cantidad, más listado de órdenes con etiquetas de estado (`Pendiente` / `Completado`)[cite: 15].
 
 ### F. Dashboard Analítico (`GET /api/reportes/dashboard` - Solo `admin`)
